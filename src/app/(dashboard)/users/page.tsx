@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Shield, Trash2 } from "lucide-react";
 
+import { ApiClientError } from "@/api/types";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,23 @@ const ROLE_VARIANT = {
   admin: "info",
   superadmin: "success",
 } as const;
+
+// The backend returns delete-user errors with an English message. Map the
+// known error codes to Spanish for the admin UI; fall back to the raw message.
+const DELETE_USER_ERROR_MESSAGES: Record<string, string> = {
+  USER_HAS_FINANCIAL_RECORDS:
+    "No se puede eliminar este usuario porque tiene pagos o alquileres registrados.",
+  CANNOT_DELETE_SELF: "No podés eliminar tu propia cuenta.",
+};
+
+function deleteUserErrorMessage(error: unknown): string | null {
+  if (!error) return null;
+  if (error instanceof ApiClientError) {
+    return DELETE_USER_ERROR_MESSAGES[error.code] ?? error.message;
+  }
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
 
 export default function UsersPage() {
   const currentUser = useAuthStore((s) => s.user);
@@ -255,7 +273,7 @@ export default function UsersPage() {
         confirmLabel="Eliminar"
         confirmVariant="danger"
         pending={deleteMutation.isPending}
-        error={deleteMutation.error ? deleteMutation.error.message : null}
+        error={deleteUserErrorMessage(deleteMutation.error)}
       />
     </>
   );
