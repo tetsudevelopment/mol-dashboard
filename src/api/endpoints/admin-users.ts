@@ -18,6 +18,8 @@ const ListResponseSchema = z.object({
 
 const SingleResponseSchema = z.object({ user: AdminUserSchema });
 
+const DeleteResponseSchema = z.object({ id: z.string() });
+
 export interface ListUsersFilters {
   role?: UserRole;
   status?: UserStatus;
@@ -52,4 +54,11 @@ export async function updateUserRole(
     apiClient.patch<ApiEnvelope<unknown>>(`/admin/users/${id}/role`, input),
   );
   return SingleResponseSchema.parse(raw).user;
+}
+
+export async function deleteUser(id: string): Promise<{ id: string }> {
+  const raw = await unwrap(
+    apiClient.delete<ApiEnvelope<unknown>>(`/admin/users/${id}`),
+  );
+  return DeleteResponseSchema.parse(raw);
 }
