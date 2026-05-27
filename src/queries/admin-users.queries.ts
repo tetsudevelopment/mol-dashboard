@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  deleteUser,
   getUser,
   listUsers,
   updateUserRole,
@@ -31,6 +32,16 @@ export function useUpdateUserRole() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.users.all });
       qc.invalidateQueries({ queryKey: queryKeys.admin.users.byId(vars.id) });
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteUser(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.users.all });
     },
   });
 }

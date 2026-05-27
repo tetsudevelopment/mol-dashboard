@@ -1,16 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Shield } from "lucide-react";
+import { Shield, Trash2 } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { Modal } from "@/components/ui/modal";
 import { Field, Select, TextInput } from "@/components/ui/input";
-import { useUsers, useUpdateUserRole } from "@/queries/admin-users.queries";
+import {
+  useDeleteUser,
+  useUpdateUserRole,
+  useUsers,
+} from "@/queries/admin-users.queries";
 import { useAuthStore } from "@/stores/auth.store";
 import type { AdminUser, UserRole } from "@/validators/user.schema";
 
@@ -33,9 +38,33 @@ export default function UsersPage() {
   const [newRole, setNewRole] = useState<UserRole>("user");
   const updateMutation = useUpdateUserRole();
 
+  const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
+  const deleteMutation = useDeleteUser();
+
   function openRoleModal(user: AdminUser) {
     setRoleTarget(user);
     setNewRole(user.role);
+  }
+
+  function openDeleteDialog(user: AdminUser) {
+    deleteMutation.reset();
+    setDeleteTarget(user);
+  }
+
+  function handleDeleteCancel() {
+    if (deleteMutation.isPending) return;
+    deleteMutation.reset();
+    setDeleteTarget(null);
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      setDeleteTarget(null);
+    } catch {
+      /* error surfaced via deleteMutation.error in the dialog */
+    }
   }
 
   async function handleRoleSubmit() {
@@ -91,16 +120,32 @@ export default function UsersPage() {
       header: "",
       className: "text-right",
       render: (u) => (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => openRoleModal(u)}
-          disabled={u.id === currentUser?.id}
-          title={u.id === currentUser?.id ? "No podés cambiar tu propio rol" : "Cambiar rol"}
-          data-testid={`user-role-btn-${u.id}`}
-        >
-          <Shield className="size-3.5" aria-hidden />
-        </Button>
+        <div className="flex justify-end gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => openRoleModal(u)}
+            disabled={u.id === currentUser?.id}
+            title={u.id === currentUser?.id ? "No podés cambiar tu propio rol" : "Cambiar rol"}
+            data-testid={`user-role-btn-${u.id}`}
+          >
+            <Shield className="size-3.5" aria-hidden />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => openDeleteDialog(u)}
+            disabled={u.id === currentUser?.id}
+            title={
+              u.id === currentUser?.id
+                ? "No podés eliminar tu propia cuenta"
+                : "Eliminar usuario"
+            }
+            data-testid={`user-delete-btn-${u.id}`}
+          >
+            <Trash2 className="size-3.5 text-red-600 dark:text-red-400" aria-hidden />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -196,6 +241,22 @@ export default function UsersPage() {
           </div>
         ) : null}
       </Modal>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar usuario"
+        description={
+          deleteTarget
+            ? `¿Eliminar a ${deleteTarget.first_name} ${deleteTarget.last_name} (${deleteTarget.email ?? "sin email"})? Esta acción no se puede deshacer.`
+            : ""
+        }
+        confirmLabel="Eliminar"
+        confirmVariant="danger"
+        pending={deleteMutation.isPending}
+        error={deleteMutation.error ? deleteMutation.error.message : null}
+      />
     </>
   );
 }
