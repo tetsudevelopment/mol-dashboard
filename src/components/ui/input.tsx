@@ -20,6 +20,22 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   },
 );
 
+export const Checkbox = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  function Checkbox({ className, ...props }, ref) {
+    return (
+      <input
+        ref={ref}
+        type="checkbox"
+        className={cn(
+          "size-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-950",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
+
 export function Field({
   label,
   htmlFor,

@@ -12,6 +12,7 @@ import {
   CreditCard,
   Webhook,
   ScrollText,
+  Megaphone,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -30,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/users", label: "Users", icon: Users, description: "List & role management" },
   { href: "/stations", label: "Stations", icon: MapPin, description: "Gabinetes" },
   { href: "/power-banks", label: "Power Banks", icon: BatteryCharging, description: "Baterías" },
+  { href: "/publicidad", label: "Publicidad", icon: Megaphone, description: "Anunciantes y anuncios" },
   { href: "/rentals", label: "Rentals", icon: Receipt, description: "Alquileres" },
   { href: "/payments", label: "Payments", icon: CreditCard, description: "Pagos" },
   { href: "/webhooks", label: "Webhooks", icon: Webhook, description: "Simulator" },
