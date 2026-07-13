@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, Select, TextInput } from "@/components/ui/input";
 import { ErrorBanner } from "@/components/ui/error-banner";
+import { toDirectMediaUrl } from "@/lib/media-url";
 
 type AdFormValues = z.input<typeof CreateAdInputSchema>;
 
@@ -59,6 +60,9 @@ export function AdForm({
   const mediaUrl = useWatch({ control, name: "media_url" });
   const mediaType = useWatch({ control, name: "media_type" }) as AdMediaType;
 
+  const [driveConverted, setDriveConverted] = useState(false);
+  const mediaUrlField = register("media_url");
+
   // Videos play for the length of the file — the duration field only makes
   // sense for images. Force it to null so we never submit a stale value.
   useEffect(() => {
@@ -90,16 +94,34 @@ export function AdForm({
         hint={
           mediaType === "video"
             ? "Debe ser un archivo directo (.mp4 / .webm). Los enlaces de YouTube o Vimeo no sirven: bloquean el autoplay embebido en el gabinete."
-            : undefined
+            : "Pegá la URL directa de la imagen, o un link de Google Drive (lo convertimos solo)."
         }
       >
         <TextInput
           id="media_url"
           data-testid="ad-media-url"
-          placeholder="https://…"
-          {...register("media_url")}
+          placeholder="https://… o un link de Google Drive"
+          {...mediaUrlField}
+          onBlur={(e) => {
+            mediaUrlField.onBlur(e);
+            const raw = e.target.value;
+            const direct = mediaType === "video" ? raw : toDirectMediaUrl(raw);
+            if (direct !== raw) {
+              setValue("media_url", direct, { shouldValidate: true, shouldDirty: true });
+              setDriveConverted(true);
+            } else {
+              setDriveConverted(false);
+            }
+          }}
         />
       </Field>
+
+      {driveConverted ? (
+        <p data-testid="ad-drive-converted" className="text-xs text-zinc-500">
+          Convertimos tu link de Google Drive a una URL directa. (Para producción,
+          mejor un hosting propio: Drive puede fallar en el gabinete.)
+        </p>
+      ) : null}
 
       {unsupportedVideoHost ? (
         <div
