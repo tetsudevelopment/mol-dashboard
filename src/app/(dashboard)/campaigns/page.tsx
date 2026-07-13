@@ -109,7 +109,25 @@ export default function CampaignsPage() {
         const result = adsResults[campaigns.findIndex((x) => x.id === c.id)];
         if (result?.isPending) return <span className="text-xs text-zinc-400">…</span>;
         if (result?.isError) return <span className="text-xs text-zinc-400">—</span>;
-        return <span className="text-xs">{result?.data?.ads.length ?? 0}</span>;
+        const count = result?.data?.ads.length ?? 0;
+        return (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setAdsTarget(c)}
+            data-testid={`campaign-ads-count-${c.id}`}
+            title="Gestionar anuncios de esta campaña"
+          >
+            {count === 0 ? (
+              <>
+                <Plus className="size-3.5" aria-hidden />
+                Agregar
+              </>
+            ) : (
+              `${count} ${count === 1 ? "anuncio" : "anuncios"}`
+            )}
+          </Button>
+        );
       },
     },
     {
@@ -147,8 +165,8 @@ export default function CampaignsPage() {
             variant="ghost"
             onClick={() => setAdsTarget(c)}
             data-testid={`campaign-ads-btn-${c.id}`}
-            aria-label={`Ver anuncios de ${c.name}`}
-            title="Ver anuncios"
+            aria-label={`Gestionar anuncios de ${c.name}`}
+            title="Gestionar anuncios"
           >
             <ListVideo className="size-3.5" aria-hidden />
           </Button>
@@ -257,7 +275,7 @@ export default function CampaignsPage() {
       <ConfirmDialog
         open={deleteTarget !== null}
         title={`Borrar campaña "${deleteTarget?.name ?? ""}"`}
-        description="Esta acción es irreversible. Si el back la rechaza por tener anuncios asociados, borralos primero desde 'Ver anuncios'."
+        description="Esta acción es irreversible. Si el back la rechaza por tener anuncios asociados, borralos primero desde 'Gestionar anuncios'."
         confirmLabel="Borrar"
         confirmVariant="danger"
         pending={deleteMutation.isPending}
