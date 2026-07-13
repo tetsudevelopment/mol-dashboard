@@ -44,9 +44,11 @@ export const queryKeys = {
     advertisers: {
       all: ["admin", "advertisers"] as const,
     },
-    ads: {
-      byAdvertiser: (advertiserId: string) =>
-        ["admin", "ads", "byAdvertiser", advertiserId] as const,
+    campaigns: {
+      all: ["admin", "campaigns"] as const,
+      byId: (id: string) => ["admin", "campaigns", id] as const,
+      ads: (id: string) => ["admin", "campaigns", id, "ads"] as const,
+      stations: (id: string) => ["admin", "campaigns", id, "stations"] as const,
     },
   },
 } as const;

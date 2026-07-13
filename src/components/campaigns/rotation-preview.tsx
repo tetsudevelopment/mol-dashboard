@@ -5,33 +5,36 @@ import { ChevronRight, Film, Image as ImageIcon, Repeat } from "lucide-react";
 import {
   computeRotationPreview,
   type RotationAdInput,
-  type RotationAdvertiserInput,
+  type RotationCampaignInput,
 } from "@/lib/ad-rotation";
-import type { Advertiser } from "@/validators/advertiser.schema";
+import type { Campaign } from "@/validators/campaign.schema";
 import type { Ad } from "@/validators/ad.schema";
 
 /**
- * Read-only simulation of the playlist the cabinet will play, computed
- * entirely in the browser from what's already loaded (active advertisers ×
- * their active ads). It never calls the backend — the real order is decided
- * by `GET /devices/me/ad-playlist`. This panel exists purely so an admin can
- * sanity-check weights before saving them.
+ * Read-only simulation of the playlist order across every active campaign
+ * shown here, computed entirely in the browser from what's already loaded
+ * (active campaigns × their active ads). It never calls the backend and does
+ * NOT account for per-station campaign assignment — the real playlist for a
+ * specific gabinete is decided by `GET /devices/me/ad-playlist`, which only
+ * interleaves the campaigns actually assigned to that station. This panel
+ * exists purely so an admin can sanity-check campaign weights before saving
+ * them.
  */
 export function RotationPreviewPanel({
-  advertisers,
-  adsByAdvertiserId,
+  campaigns,
+  adsByCampaignId,
 }: {
-  advertisers: Advertiser[];
-  adsByAdvertiserId: Map<string, Ad[]>;
+  campaigns: Campaign[];
+  adsByCampaignId: Map<string, Ad[]>;
 }) {
-  const rotationAdvertisers: RotationAdvertiserInput[] = advertisers
-    .filter((a) => a.is_active)
-    .map((a) => ({ id: a.id, name: a.name, weight: a.weight }));
+  const rotationCampaigns: RotationCampaignInput[] = campaigns
+    .filter((c) => c.is_active)
+    .map((c) => ({ id: c.id, name: c.name, weight: c.weight }));
 
   const adsMap = new Map<string, RotationAdInput[]>();
-  for (const [advertiserId, ads] of adsByAdvertiserId) {
+  for (const [campaignId, ads] of adsByCampaignId) {
     adsMap.set(
-      advertiserId,
+      campaignId,
       ads
         .filter((ad) => ad.is_active)
         .map((ad) => ({
@@ -43,7 +46,7 @@ export function RotationPreviewPanel({
     );
   }
 
-  const preview = computeRotationPreview(rotationAdvertisers, adsMap);
+  const preview = computeRotationPreview(rotationCampaigns, adsMap);
 
   return (
     <section
@@ -55,9 +58,10 @@ export function RotationPreviewPanel({
         <div>
           <h2 className="text-sm font-semibold">Vista previa de la rotación</h2>
           <p className="text-xs text-zinc-500">
-            Simulación local de cómo el gabinete va a intercalar los anuncios activos hoy
-            (weighted round-robin suave, igual al backend). No se consulta al backend — es
-            solo para validar los pesos antes de guardarlos.
+            Simulación local de cómo se intercalarían las campañas activas hoy (weighted
+            round-robin suave, igual al backend), sin tener en cuenta a qué gabinetes está
+            asignada cada una. No se consulta al backend — es solo para validar los pesos
+            antes de guardarlos.
           </p>
         </div>
       </header>
@@ -67,8 +71,8 @@ export function RotationPreviewPanel({
           data-testid="rotation-preview-empty"
           className="rounded-md border border-dashed border-zinc-300 px-3 py-4 text-center text-xs text-zinc-500 dark:border-zinc-700"
         >
-          No hay anuncios activos todavía. Marcá una empresa como activa y cargale al menos
-          un anuncio activo para ver la rotación acá.
+          No hay anuncios activos todavía. Marcá una campaña como activa y cargale al menos un
+          anuncio activo para ver la rotación acá.
         </p>
       ) : (
         <ol
@@ -88,7 +92,7 @@ export function RotationPreviewPanel({
                 ) : (
                   <ImageIcon className="size-3 text-zinc-400" aria-hidden />
                 )}
-                <span className="font-medium">{item.advertiserName}</span>
+                <span className="font-medium">{item.campaignName}</span>
               </span>
               {index < preview.length - 1 ? (
                 <ChevronRight className="size-3 text-zinc-300 dark:text-zinc-700" aria-hidden />

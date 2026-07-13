@@ -20,7 +20,7 @@ import { ErrorBanner } from "@/components/ui/error-banner";
 type AdFormValues = z.input<typeof CreateAdInputSchema>;
 
 interface Props {
-  advertiserId: string;
+  campaignId: string;
   defaultValues?: Partial<AdFormValues>;
   submitLabel: string;
   onSubmit: (values: CreateAdInput) => void;
@@ -30,7 +30,7 @@ interface Props {
 }
 
 export function AdForm({
-  advertiserId,
+  campaignId,
   defaultValues,
   submitLabel,
   onSubmit,
@@ -47,7 +47,7 @@ export function AdForm({
   } = useForm<AdFormValues, unknown, CreateAdInput>({
     resolver: zodResolver(CreateAdInputSchema),
     defaultValues: {
-      advertiser_id: advertiserId,
+      campaign_id: campaignId,
       media_type: "image",
       duration_seconds: DEFAULT_IMAGE_DURATION_SECONDS,
       is_active: true,
@@ -154,7 +154,7 @@ export function AdForm({
         label="Orden"
         htmlFor="sort_order"
         error={errors.sort_order?.message}
-        hint="Orden de rotación entre los anuncios de esta misma empresa."
+        hint="Orden de rotación entre los anuncios de esta misma campaña."
       >
         <TextInput
           id="sort_order"

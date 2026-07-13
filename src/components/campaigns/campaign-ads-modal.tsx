@@ -9,25 +9,30 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { StatusBadge } from "@/components/status-badge";
-import { AdForm } from "@/components/advertisers/ad-form";
-import { useAds, useCreateAd, useDeleteAd, useUpdateAd } from "@/queries/admin-ads.queries";
-import type { Advertiser } from "@/validators/advertiser.schema";
+import { AdForm } from "@/components/campaigns/ad-form";
+import {
+  useCampaignAds,
+  useCreateCampaignAd,
+  useDeleteCampaignAd,
+  useUpdateCampaignAd,
+} from "@/queries/admin-campaigns.queries";
+import type { Campaign } from "@/validators/campaign.schema";
 import type { Ad, CreateAdInput, UpdateAdInput } from "@/validators/ad.schema";
 
-export function AdvertiserAdsModal({
-  advertiser,
+export function CampaignAdsModal({
+  campaign,
   open,
   onClose,
 }: {
-  advertiser: Advertiser | null;
+  campaign: Campaign | null;
   open: boolean;
   onClose: () => void;
 }) {
-  const advertiserId = advertiser?.id;
-  const adsQuery = useAds(open ? advertiserId : undefined);
-  const createMutation = useCreateAd();
-  const updateMutation = useUpdateAd();
-  const deleteMutation = useDeleteAd();
+  const campaignId = campaign?.id;
+  const adsQuery = useCampaignAds(open ? campaignId : undefined);
+  const createMutation = useCreateCampaignAd();
+  const updateMutation = useUpdateCampaignAd();
+  const deleteMutation = useDeleteCampaignAd();
 
   const [view, setView] = useState<"list" | "form">("list");
   const [editTarget, setEditTarget] = useState<Ad | null>(null);
@@ -61,6 +66,7 @@ export function AdvertiserAdsModal({
   }
 
   async function handleSubmit(values: CreateAdInput) {
+    if (!campaignId) return;
     if (editTarget) {
       const updateInput: UpdateAdInput = {
         media_url: values.media_url,
@@ -69,20 +75,16 @@ export function AdvertiserAdsModal({
         is_active: values.is_active,
         sort_order: values.sort_order,
       };
-      await updateMutation.mutateAsync({
-        id: editTarget.id,
-        advertiserId: values.advertiser_id,
-        input: updateInput,
-      });
+      await updateMutation.mutateAsync({ id: editTarget.id, campaignId, input: updateInput });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync({ campaignId, input: values });
     }
     backToList();
   }
 
   async function handleDelete() {
-    if (!deleteTarget || !advertiserId) return;
-    await deleteMutation.mutateAsync({ id: deleteTarget.id, advertiserId });
+    if (!deleteTarget || !campaignId) return;
+    await deleteMutation.mutateAsync({ id: deleteTarget.id, campaignId });
     setDeleteTarget(null);
   }
 
@@ -167,20 +169,20 @@ export function AdvertiserAdsModal({
       title={
         view === "form"
           ? editTarget
-            ? `Editar anuncio de ${advertiser?.name ?? ""}`
-            : `Nuevo anuncio para ${advertiser?.name ?? ""}`
-          : `Anuncios de ${advertiser?.name ?? ""}`
+            ? `Editar anuncio de ${campaign?.name ?? ""}`
+            : `Nuevo anuncio para ${campaign?.name ?? ""}`
+          : `Anuncios de ${campaign?.name ?? ""}`
       }
       width="xl"
     >
-      {!advertiser ? null : view === "form" ? (
+      {!campaign ? null : view === "form" ? (
         <AdForm
-          advertiserId={advertiser.id}
+          campaignId={campaign.id}
           submitLabel={editTarget ? "Guardar" : "Crear"}
           defaultValues={
             editTarget
               ? {
-                  advertiser_id: editTarget.advertiser_id,
+                  campaign_id: editTarget.campaign_id,
                   media_url: editTarget.media_url,
                   media_type: editTarget.media_type,
                   duration_seconds: editTarget.duration_seconds,
@@ -195,10 +197,10 @@ export function AdvertiserAdsModal({
           error={createMutation.error ?? updateMutation.error}
         />
       ) : (
-        <div data-testid="advertiser-ads-content" className="space-y-4">
+        <div data-testid="campaign-ads-content" className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-xs text-zinc-500">
-              Peso de la empresa: <span className="font-medium">{advertiser.weight}</span>
+              Peso de la campaña: <span className="font-medium">{campaign.weight}</span>
               {" · "}
               {ads.length} {ads.length === 1 ? "anuncio" : "anuncios"}
             </p>
@@ -220,7 +222,7 @@ export function AdvertiserAdsModal({
             columns={columns}
             rowKey={(ad) => ad.id}
             loading={adsQuery.isPending}
-            empty="Esta empresa todavía no tiene anuncios cargados."
+            empty="Esta campaña todavía no tiene anuncios cargados."
             testId="ads-table"
           />
         </div>
