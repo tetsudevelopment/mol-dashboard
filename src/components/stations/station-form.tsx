@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -16,20 +17,31 @@ type StationFormValues = z.input<typeof CreateStationInputSchema>;
 
 interface Props {
   defaultValues?: Partial<StationFormValues>;
+  /** Current device_id bound to this station, prefilled when editing. Empty when creating. */
+  defaultDeviceId?: string;
   submitLabel: string;
-  onSubmit: (values: CreateStationInput) => void;
+  /**
+   * `deviceId` is the trimmed value of the device_id field, or null when left
+   * empty. It's reported separately from `values` because it belongs to a
+   * different resource (cabinet-devices, not stations) — the caller decides
+   * whether to create/replace/clear the binding.
+   */
+  onSubmit: (values: CreateStationInput, deviceId: string | null) => void;
   onCancel: () => void;
   pending?: boolean;
   error?: unknown;
+  deviceError?: unknown;
 }
 
 export function StationForm({
   defaultValues,
+  defaultDeviceId = "",
   submitLabel,
   onSubmit,
   onCancel,
   pending = false,
   error,
+  deviceError,
 }: Props) {
   const {
     register,
@@ -44,10 +56,15 @@ export function StationForm({
       ...defaultValues,
     },
   });
+  const [deviceId, setDeviceId] = useState(defaultDeviceId);
+
+  function submit(values: CreateStationInput) {
+    onSubmit(values, deviceId.trim() || null);
+  }
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(submit)}
       data-testid="station-form"
       className="space-y-3"
     >
@@ -55,14 +72,9 @@ export function StationForm({
         <TextInput id="name" data-testid="station-name" {...register("name")} />
       </Field>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Ciudad" htmlFor="city" error={errors.city?.message}>
-          <TextInput id="city" data-testid="station-city" {...register("city")} />
-        </Field>
-        <Field label="Zona" htmlFor="zone" error={errors.zone?.message}>
-          <TextInput id="zone" data-testid="station-zone" {...register("zone")} />
-        </Field>
-      </div>
+      <Field label="Ciudad" htmlFor="city" error={errors.city?.message}>
+        <TextInput id="city" data-testid="station-city" {...register("city")} />
+      </Field>
 
       <Field label="Dirección" htmlFor="address" error={errors.address?.message}>
         <TextInput id="address" data-testid="station-address" {...register("address")} />
@@ -122,35 +134,30 @@ export function StationForm({
         </Field>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <Field label="Status" htmlFor="status" error={errors.status?.message}>
-          <Select id="status" data-testid="station-status" {...register("status")}>
-            <option value="online">online</option>
-            <option value="offline">offline</option>
-            <option value="maintenance">maintenance</option>
-          </Select>
-        </Field>
-        <Field label="Abre" htmlFor="opening_time" error={errors.opening_time?.message}>
-          <TextInput
-            id="opening_time"
-            type="time"
-            {...register("opening_time")}
-          />
-        </Field>
-        <Field label="Cierra" htmlFor="closing_time" error={errors.closing_time?.message}>
-          <TextInput
-            id="closing_time"
-            type="time"
-            {...register("closing_time")}
-          />
-        </Field>
-      </div>
+      <Field label="Status" htmlFor="status" error={errors.status?.message}>
+        <Select id="status" data-testid="station-status" {...register("status")}>
+          <option value="online">online</option>
+          <option value="offline">offline</option>
+          <option value="maintenance">maintenance</option>
+        </Select>
+      </Field>
 
-      <Field label="Descripción" htmlFor="description" error={errors.description?.message}>
-        <TextInput id="description" {...register("description")} />
+      <Field
+        label="Device ID del gabinete"
+        htmlFor="device_id"
+        hint="Opcional. ID de hardware impreso en el gabinete físico (ej. DTA38300). Al guardar, la asignación al gabinete se crea, reemplaza o libera según corresponda."
+      >
+        <TextInput
+          id="device_id"
+          data-testid="station-device-id"
+          placeholder="DTA38300"
+          value={deviceId}
+          onChange={(e) => setDeviceId(e.target.value)}
+        />
       </Field>
 
       <ErrorBanner error={error} testId="station-form-error" />
+      <ErrorBanner error={deviceError} testId="station-device-error" />
 
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="ghost" onClick={onCancel} disabled={pending}>

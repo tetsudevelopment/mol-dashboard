@@ -18,6 +18,11 @@ export const queryKeys = {
         ["admin", "power-banks", "list", filters] as const,
       byId: (id: string) => ["admin", "power-banks", id] as const,
     },
+    cabinetDevices: {
+      all: ["admin", "cabinet-devices"] as const,
+      ejectCommand: (deviceId: string, commandId: string) =>
+        ["admin", "cabinet-devices", deviceId, "eject-commands", commandId] as const,
+    },
     users: {
       all: ["admin", "users"] as const,
       list: (filters: Record<string, unknown>) =>

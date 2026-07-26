@@ -3,7 +3,9 @@
 import { Modal } from "@/components/ui/modal";
 import { StatusBadge } from "@/components/status-badge";
 import { ErrorBanner } from "@/components/ui/error-banner";
+import { CabinetDeviceStatus } from "@/components/stations/cabinet-device-status";
 import { useStationState } from "@/queries/admin-stations.queries";
+import type { CabinetDevice } from "@/validators/cabinet-device.schema";
 
 const STATUS_VARIANT = {
   available: "success",
@@ -16,10 +18,12 @@ const STATUS_VARIANT = {
 export function StationStateModal({
   stationId,
   open,
+  cabinetDevice = null,
   onClose,
 }: {
   stationId: string | null;
   open: boolean;
+  cabinetDevice?: CabinetDevice | null;
   onClose: () => void;
 }) {
   const { data, error, isPending } = useStationState(open && stationId ? stationId : undefined);
@@ -52,6 +56,16 @@ export function StationStateModal({
                 {data.station.status}
               </StatusBadge>
             </header>
+
+            <section
+              data-testid="station-state-cabinet-device"
+              className="rounded-md border border-dashed border-zinc-300 px-3 py-2 dark:border-zinc-700"
+            >
+              <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                Gabinete físico
+              </h4>
+              <CabinetDeviceStatus device={cabinetDevice} />
+            </section>
 
             <section
               data-testid="station-state-summary"
