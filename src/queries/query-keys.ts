@@ -58,5 +58,10 @@ export const queryKeys = {
       ads: (id: string) => ["admin", "campaigns", id, "ads"] as const,
       stations: (id: string) => ["admin", "campaigns", id, "stations"] as const,
     },
+    coupons: {
+      all: ["admin", "coupons"] as const,
+      list: (filters: Record<string, unknown>) =>
+        ["admin", "coupons", "list", filters] as const,
+    },
   },
 } as const;

@@ -15,6 +15,7 @@ import {
   Megaphone,
   Target,
   BellRing,
+  TicketPercent,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -36,6 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/publicidad", label: "Publicidad", icon: Megaphone, description: "Anunciantes y anuncios" },
   { href: "/campaigns", label: "Campañas", icon: Target, description: "Campañas y asignación a gabinetes" },
   { href: "/notifications", label: "Notificaciones", icon: BellRing, description: "Envío push y buzón in-app" },
+  { href: "/coupons", label: "Códigos", icon: TicketPercent, description: "Cupones de descuento" },
   { href: "/rentals", label: "Rentals", icon: Receipt, description: "Alquileres" },
   { href: "/payments", label: "Payments", icon: CreditCard, description: "Pagos" },
   { href: "/webhooks", label: "Webhooks", icon: Webhook, description: "Simulator" },
