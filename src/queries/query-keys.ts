@@ -63,5 +63,10 @@ export const queryKeys = {
       list: (filters: Record<string, unknown>) =>
         ["admin", "coupons", "list", filters] as const,
     },
+    policyAcceptances: {
+      all: ["admin", "policy-acceptances"] as const,
+      list: (filters: Record<string, unknown>) =>
+        ["admin", "policy-acceptances", "list", filters] as const,
+    },
   },
 } as const;
