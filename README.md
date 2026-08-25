@@ -34,3 +34,22 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Docker
+
+La imagen de producción corre un servidor Next.js `standalone` en el puerto
+`3011`, con probe de liveness en `GET /api/health`.
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_API_URL=https://backmolapi.vepay.com.co \
+  -t moltech-dashboard:latest .
+
+docker run -d -p 3011:3011 moltech-dashboard:latest
+```
+
+`NEXT_PUBLIC_API_URL` se incrusta en el bundle durante el build: cambiarla
+exige reconstruir la imagen, no basta con reiniciar el contenedor.
+
+Guía completa de despliegue (Compose, Kubernetes, proxy inverso, troubleshooting):
+[`docs/deployment.md`](docs/deployment.md).
