@@ -11,7 +11,13 @@ export const PaymentStatusSchema = z.enum([
 ]);
 export type PaymentStatus = z.infer<typeof PaymentStatusSchema>;
 
-export const PaymentConceptSchema = z.enum(["rental", "penalty", "refund"]);
+// Mirrors `payment_concept_enum` in the API's Prisma schema — keep in sync.
+export const PaymentConceptSchema = z.enum([
+  "rental",
+  "penalty",
+  "refund",
+  "extension",
+]);
 export type PaymentConcept = z.infer<typeof PaymentConceptSchema>;
 
 export const PaymentGatewaySchema = z.enum([
@@ -25,7 +31,10 @@ export type PaymentGateway = z.infer<typeof PaymentGatewaySchema>;
 
 export const PaymentSchema = z.object({
   id: UuidSchema,
-  rental_id: UuidSchema,
+  // Nullable since 2026-08-30: a PSE payment row is written at checkout, before
+  // the rental exists — the rental is only created once the webhook confirms.
+  // Until then the API emits null here.
+  rental_id: UuidSchema.nullable(),
   user_id: UuidSchema,
   payment_method_id: UuidSchema.nullable(),
   concept: PaymentConceptSchema,

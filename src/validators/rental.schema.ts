@@ -13,9 +13,15 @@ export type RentalStatus = z.infer<typeof RentalStatusSchema>;
 export const RentalSchema = z.object({
   id: UuidSchema,
   user_id: UuidSchema,
-  power_bank_id: UuidSchema,
+  // Nullable: a rental is created the moment the charge is authorized, before
+  // any battery is dispensed. The cabinet claims a power bank afterwards via
+  // the devices API, so the API emits null until that happens.
+  power_bank_id: UuidSchema.nullable(),
   pickup_station_id: UuidSchema,
-  payment_method_id: UuidSchema,
+  // Nullable since 2026-08-30: a rental whose coupon covers 100% of the cost
+  // never touches the payment gateway, so it can be created by a user with no
+  // card on file. The API emits null for those.
+  payment_method_id: UuidSchema.nullable(),
   coupon_id: UuidSchema.nullable(),
   start_time: IsoDateSchema,
   end_time: IsoDateSchema.nullable(),
