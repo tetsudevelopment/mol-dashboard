@@ -1,8 +1,4 @@
 export const queryKeys = {
-  health: {
-    live: ["health", "live"] as const,
-    ready: ["health", "ready"] as const,
-  },
   auth: {
     me: ["auth", "me"] as const,
   },

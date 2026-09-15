@@ -4,13 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Activity,
-  ShieldCheck,
   Users,
   MapPin,
   BatteryCharging,
   Receipt,
   CreditCard,
-  Webhook,
   ScrollText,
   Megaphone,
   Target,
@@ -31,7 +29,6 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: Activity, description: "Backend status" },
-  { href: "/health", label: "Health", icon: ShieldCheck, description: "Live & ready probes" },
   { href: "/users", label: "Users", icon: Users, description: "List & role management" },
   { href: "/stations", label: "Stations", icon: MapPin, description: "Gabinetes" },
   { href: "/power-banks", label: "Power Banks", icon: BatteryCharging, description: "Baterías" },
@@ -42,7 +39,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/policy-acceptances", label: "Términos", icon: FileCheck2, description: "Aceptaciones de políticas" },
   { href: "/rentals", label: "Rentals", icon: Receipt, description: "Alquileres" },
   { href: "/payments", label: "Payments", icon: CreditCard, description: "Pagos" },
-  { href: "/webhooks", label: "Webhooks", icon: Webhook, description: "Simulator" },
   { href: "/audit", label: "Audit", icon: ScrollText, description: "Append-only log" },
 ];
 

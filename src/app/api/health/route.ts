@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
  * backend is down is degraded, not dead — failing this probe would make the
  * orchestrator restart a perfectly healthy container.
  *
- * Backend reachability is surfaced to humans at /health instead.
+ * Backend reachability is surfaced to humans on the Overview page instead.
  */
 
 export const runtime = "nodejs";
