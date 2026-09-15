@@ -5,6 +5,14 @@
   --foreground: #171717;
   --brand-red: #e30613;
   --brand-black: #000000;
+
+  /* Chart series. Money reads in the brand colour; volume needs a hue far
+     enough from it to stay separable, including for red-green colour blindness.
+     Deliberately NOT registered in @theme inline: Tailwind inlines theme-owned
+     values and drops the custom property, and the chart reads these through a
+     raw var() inside a JS string that the class scanner cannot see. */
+  --chart-revenue: var(--brand-red);
+  --chart-rentals: #0284c7;
 }
 
 @theme inline {
@@ -19,6 +27,8 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    /* Lifted for contrast against the dark card surface. */
+    --chart-rentals: #38bdf8;
   }
 }
 

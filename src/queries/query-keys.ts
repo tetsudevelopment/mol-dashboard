@@ -7,6 +7,10 @@ export const queryKeys = {
     me: ["auth", "me"] as const,
   },
   admin: {
+    overview: {
+      all: ["admin", "overview"] as const,
+      byPeriod: (days: number) => ["admin", "overview", days] as const,
+    },
     stations: {
       all: ["admin", "stations"] as const,
       byId: (id: string) => ["admin", "stations", id] as const,
