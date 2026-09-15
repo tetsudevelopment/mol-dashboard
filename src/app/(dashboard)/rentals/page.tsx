@@ -8,6 +8,7 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { Field, Select } from "@/components/ui/input";
 import { useRentals } from "@/queries/admin-rentals.queries";
+import { usePagination } from "@/lib/pagination";
 import type { Rental, RentalStatus } from "@/validators/rental.schema";
 
 const STATUS_VARIANT = {
@@ -19,8 +20,11 @@ const STATUS_VARIANT = {
 
 export default function RentalsPage() {
   const [statusFilter, setStatusFilter] = useState<RentalStatus | "">("");
+  const { page, pageSize, setPage, setPageSize } = usePagination(statusFilter);
   const rentalsQuery = useRentals({
     ...(statusFilter !== "" ? { status: statusFilter } : {}),
+    page,
+    pageSize,
   });
 
   const columns: Column<Rental>[] = [
@@ -119,6 +123,13 @@ export default function RentalsPage() {
         loading={rentalsQuery.isPending}
         empty="No hay alquileres todavía."
         testId="rentals-table"
+        pagination={{
+          page,
+          pageSize,
+          total: rentalsQuery.data?.total ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
     </>
   );

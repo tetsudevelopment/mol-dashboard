@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   createCoupon,
   deleteCoupon,
@@ -16,6 +21,9 @@ export function useCoupons(params: ListCouponsParams = {}) {
   return useQuery({
     queryKey: queryKeys.admin.coupons.list(params as Record<string, unknown>),
     queryFn: () => listCoupons(params),
+    // Keep the current page on screen while the next one loads — otherwise
+    // every page change blanks the table and flashes the loading row.
+    placeholderData: keepPreviousData,
     // Redemption counters move as users rent, so a stale list misleads an
     // operator deciding whether a code still has uses left.
     staleTime: 10_000,

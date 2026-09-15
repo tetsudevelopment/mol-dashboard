@@ -15,6 +15,7 @@ import { StationStateModal } from "@/components/stations/station-state-modal";
 import { CabinetDeviceStatus } from "@/components/stations/cabinet-device-status";
 import { EjectBatteryModal } from "@/components/stations/eject-battery-modal";
 import { ApiClientError } from "@/api/types";
+import { paginate, usePagination } from "@/lib/pagination";
 import {
   useStations,
   useCreateStation,
@@ -62,6 +63,8 @@ export default function StationsPage() {
   const deleteDeviceMutation = useDeleteCabinetDevice();
 
   const deviceByStation = new Map((devices ?? []).map((d) => [d.station_id, d]));
+
+  const { page, pageSize, setPage, setPageSize } = usePagination();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Station | null>(null);
@@ -318,12 +321,19 @@ export default function StationsPage() {
       <ErrorBanner error={error} testId="stations-list-error" />
 
       <DataTable
-        rows={data?.stations ?? []}
+        rows={paginate(data?.stations ?? [], page, pageSize)}
         columns={columns}
         rowKey={(s) => s.id}
         loading={isPending}
         empty="No hay gabinetes registrados todavía. Creá el primero."
         testId="stations-table"
+        pagination={{
+          page,
+          pageSize,
+          total: data?.stations.length ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
 
       <Modal

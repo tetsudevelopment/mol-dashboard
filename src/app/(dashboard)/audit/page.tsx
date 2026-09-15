@@ -7,14 +7,18 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { Field, TextInput } from "@/components/ui/input";
 import { useAuditLog } from "@/queries/admin-audit.queries";
+import { usePagination } from "@/lib/pagination";
 import type { AuditLog } from "@/validators/audit.schema";
 
 export default function AuditPage() {
   const [action, setAction] = useState("");
   const [actor, setActor] = useState("");
+  const { page, pageSize, setPage, setPageSize } = usePagination(`${action}|${actor}`);
   const auditQuery = useAuditLog({
     ...(action.length > 0 ? { action } : {}),
     ...(actor.length > 0 ? { actor } : {}),
+    page,
+    pageSize,
   });
 
   const columns: Column<AuditLog>[] = [
@@ -93,6 +97,13 @@ export default function AuditPage() {
         loading={auditQuery.isPending}
         empty="Sin entradas que coincidan."
         testId="audit-table"
+        pagination={{
+          page,
+          pageSize,
+          total: auditQuery.data?.total ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
     </>
   );

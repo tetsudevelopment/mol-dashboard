@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   getRental,
   listRentals,
@@ -10,6 +10,9 @@ export function useRentals(filters: ListRentalsFilters = {}) {
   return useQuery({
     queryKey: queryKeys.admin.rentals.list(filters as Record<string, unknown>),
     queryFn: () => listRentals(filters),
+    // Keep the current page on screen while the next one loads — otherwise
+    // every page change blanks the table and flashes the loading row.
+    placeholderData: keepPreviousData,
   });
 }
 

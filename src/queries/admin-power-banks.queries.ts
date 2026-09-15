@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   createPowerBank,
   deletePowerBank,
@@ -19,6 +24,9 @@ export function usePowerBanks(filters: ListPowerBanksFilters = {}) {
   return useQuery({
     queryKey: queryKeys.admin.powerBanks.list(filters as Record<string, unknown>),
     queryFn: () => listPowerBanks(filters),
+    // Keep the current page on screen while the next one loads — otherwise
+    // every page change blanks the table and flashes the loading row.
+    placeholderData: keepPreviousData,
   });
 }
 

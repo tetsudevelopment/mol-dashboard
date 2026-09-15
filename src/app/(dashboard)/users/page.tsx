@@ -17,6 +17,7 @@ import {
   useUpdateUserRole,
   useUsers,
 } from "@/queries/admin-users.queries";
+import { usePagination } from "@/lib/pagination";
 import { useAuthStore } from "@/stores/auth.store";
 import type { AdminUser, UserRole } from "@/validators/user.schema";
 
@@ -47,9 +48,12 @@ export default function UsersPage() {
   const currentUser = useAuthStore((s) => s.user);
   const [roleFilter, setRoleFilter] = useState<UserRole | "">("");
   const [search, setSearch] = useState("");
+  const { page, pageSize, setPage, setPageSize } = usePagination(`${roleFilter}|${search}`);
   const usersQuery = useUsers({
     ...(roleFilter !== "" ? { role: roleFilter } : {}),
     ...(search.length > 0 ? { search } : {}),
+    page,
+    pageSize,
   });
 
   const [roleTarget, setRoleTarget] = useState<AdminUser | null>(null);
@@ -209,6 +213,13 @@ export default function UsersPage() {
         loading={usersQuery.isPending}
         empty="No hay usuarios que coincidan."
         testId="users-table"
+        pagination={{
+          page,
+          pageSize,
+          total: usersQuery.data?.total ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
 
       <Modal

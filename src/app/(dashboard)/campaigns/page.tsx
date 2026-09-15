@@ -23,6 +23,7 @@ import {
   useUpdateCampaign,
 } from "@/queries/admin-campaigns.queries";
 import { useAdvertisers } from "@/queries/admin-advertisers.queries";
+import { paginate, usePagination } from "@/lib/pagination";
 import type { Campaign, CreateCampaignInput } from "@/validators/campaign.schema";
 import type { Ad } from "@/validators/ad.schema";
 
@@ -32,6 +33,8 @@ export default function CampaignsPage() {
   const createMutation = useCreateCampaign();
   const updateMutation = useUpdateCampaign();
   const deleteMutation = useDeleteCampaign();
+
+  const { page, pageSize, setPage, setPageSize } = usePagination();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Campaign | null>(null);
@@ -223,12 +226,19 @@ export default function CampaignsPage() {
       <ErrorBanner error={campaignsQuery.error} testId="campaigns-list-error" />
 
       <DataTable
-        rows={campaigns}
+        rows={paginate(campaigns, page, pageSize)}
         columns={columns}
         rowKey={(c) => c.id}
         loading={campaignsQuery.isPending}
         empty="No hay campañas todavía. Creá la primera."
         testId="campaigns-table"
+        pagination={{
+          page,
+          pageSize,
+          total: campaigns.length,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
 
       <RotationPreviewPanel campaigns={campaigns} adsByCampaignId={adsByCampaignId} />

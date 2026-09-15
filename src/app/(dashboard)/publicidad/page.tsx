@@ -17,6 +17,7 @@ import {
   useDeleteAdvertiser,
   useUpdateAdvertiser,
 } from "@/queries/admin-advertisers.queries";
+import { paginate, usePagination } from "@/lib/pagination";
 import type { Advertiser, CreateAdvertiserInput } from "@/validators/advertiser.schema";
 
 export default function PublicidadPage() {
@@ -24,6 +25,8 @@ export default function PublicidadPage() {
   const createMutation = useCreateAdvertiser();
   const updateMutation = useUpdateAdvertiser();
   const deleteMutation = useDeleteAdvertiser();
+
+  const { page, pageSize, setPage, setPageSize } = usePagination();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Advertiser | null>(null);
@@ -139,12 +142,19 @@ export default function PublicidadPage() {
       <ErrorBanner error={advertisersQuery.error} testId="advertisers-list-error" />
 
       <DataTable
-        rows={advertisers}
+        rows={paginate(advertisers, page, pageSize)}
         columns={columns}
         rowKey={(a) => a.id}
         loading={advertisersQuery.isPending}
         empty="No hay empresas anunciantes todavía. Creá la primera."
         testId="advertisers-table"
+        pagination={{
+          page,
+          pageSize,
+          total: advertisers.length,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
 
       <Modal

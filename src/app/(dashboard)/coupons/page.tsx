@@ -23,6 +23,7 @@ import {
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
 } from "@/lib/datetime";
+import { usePagination } from "@/lib/pagination";
 import type { Coupon, CreateCouponInput } from "@/validators/coupon.schema";
 
 type StatusFilter = Coupon["status"] | "";
@@ -31,9 +32,14 @@ export default function CouponsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [search, setSearch] = useState("");
 
+  const { page, pageSize, setPage, setPageSize } = usePagination(
+    `${statusFilter}|${search}`,
+  );
   const couponsQuery = useCoupons({
     ...(statusFilter !== "" ? { status: statusFilter } : {}),
     ...(search !== "" ? { search } : {}),
+    page,
+    pageSize,
   });
   const createMutation = useCreateCoupon();
   const updateMutation = useUpdateCoupon();
@@ -222,6 +228,13 @@ export default function CouponsPage() {
         loading={couponsQuery.isPending}
         empty="No hay códigos de descuento todavía. Creá el primero."
         testId="coupons-table"
+        pagination={{
+          page,
+          pageSize,
+          total: couponsQuery.data?.total ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
 
       <Modal

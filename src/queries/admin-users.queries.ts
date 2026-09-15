@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   deleteUser,
   getUser,
@@ -13,6 +18,9 @@ export function useUsers(filters: ListUsersFilters = {}) {
   return useQuery({
     queryKey: queryKeys.admin.users.list(filters as Record<string, unknown>),
     queryFn: () => listUsers(filters),
+    // Keep the current page on screen while the next one loads — otherwise
+    // every page change blanks the table and flashes the loading row.
+    placeholderData: keepPreviousData,
   });
 }
 

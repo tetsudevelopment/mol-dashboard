@@ -20,6 +20,7 @@ import {
   useUpdatePowerBank,
 } from "@/queries/admin-power-banks.queries";
 import { useStations } from "@/queries/admin-stations.queries";
+import { usePagination } from "@/lib/pagination";
 import type {
   CreatePowerBankInput,
   PowerBank,
@@ -40,9 +41,14 @@ export default function PowerBanksPage() {
   const [statusFilter, setStatusFilter] = useState<PowerBankStatus | "">("");
 
   const stationsQuery = useStations();
+  const { page, pageSize, setPage, setPageSize } = usePagination(
+    `${stationFilter}|${statusFilter}`,
+  );
   const powerBanksQuery = usePowerBanks({
     ...(stationFilter !== "" ? { stationId: stationFilter } : {}),
     ...(statusFilter !== "" ? { status: statusFilter } : {}),
+    page,
+    pageSize,
   });
 
   const createMutation = useCreatePowerBank();
@@ -235,6 +241,13 @@ export default function PowerBanksPage() {
         loading={powerBanksQuery.isPending}
         empty="Sin baterías que coincidan con los filtros."
         testId="pb-table"
+        pagination={{
+          page,
+          pageSize,
+          total: powerBanksQuery.data?.total ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
 
       <Modal

@@ -9,6 +9,7 @@ import { ErrorBanner } from "@/components/ui/error-banner";
 import { Field, Select, TextInput } from "@/components/ui/input";
 import { usePolicyAcceptances } from "@/queries/admin-policy-acceptances.queries";
 import { formatDateTime } from "@/lib/datetime";
+import { usePagination } from "@/lib/pagination";
 import {
   POLICY_TYPES,
   policyTypeLabel,
@@ -19,9 +20,14 @@ export default function PolicyAcceptancesPage() {
   const [policyType, setPolicyType] = useState("");
   const [version, setVersion] = useState("");
 
+  const { page, pageSize, setPage, setPageSize } = usePagination(
+    `${policyType}|${version}`,
+  );
   const query = usePolicyAcceptances({
     ...(policyType !== "" ? { policyType } : {}),
     ...(version !== "" ? { version } : {}),
+    page,
+    pageSize,
   });
 
   const acceptances = query.data?.acceptances ?? [];
@@ -138,13 +144,15 @@ export default function PolicyAcceptancesPage() {
         loading={query.isPending}
         empty="Todavía no hay aceptaciones registradas."
         testId="acceptances-table"
+        pagination={{
+          page,
+          pageSize,
+          total: query.data?.total ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
 
-      {query.data ? (
-        <p className="mt-3 text-xs text-neutral-500" data-testid="acceptances-total">
-          {query.data.total} registro{query.data.total === 1 ? "" : "s"}
-        </p>
-      ) : null}
     </>
   );
 }

@@ -8,6 +8,7 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { Field, Select } from "@/components/ui/input";
 import { usePayments } from "@/queries/admin-payments.queries";
+import { usePagination } from "@/lib/pagination";
 import type { Payment, PaymentStatus } from "@/validators/payment.schema";
 
 const STATUS_VARIANT = {
@@ -20,8 +21,11 @@ const STATUS_VARIANT = {
 
 export default function PaymentsPage() {
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | "">("");
+  const { page, pageSize, setPage, setPageSize } = usePagination(statusFilter);
   const paymentsQuery = usePayments({
     ...(statusFilter !== "" ? { status: statusFilter } : {}),
+    page,
+    pageSize,
   });
 
   const columns: Column<Payment>[] = [
@@ -112,6 +116,13 @@ export default function PaymentsPage() {
         loading={paymentsQuery.isPending}
         empty="No hay pagos todavía."
         testId="payments-table"
+        pagination={{
+          page,
+          pageSize,
+          total: paymentsQuery.data?.total ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
     </>
   );
